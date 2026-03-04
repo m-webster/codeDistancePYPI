@@ -20,7 +20,7 @@ def defaultParser():
 
     parser.add_argument("--dataset", help="Source Type. Options are codeTables, lifted_product, bivariate_bicycle, all",type=str, default='codeTables')
     parser.add_argument("--datafile", help="File containing examples - used for codeTables, stim_circuit, hyperbolic codes",type=str, default='')
-    parser.add_argument("--method", help="Distance finding method to use - options are DistRndGAP, QDistRndMW, dist_m4ri_RW, dist_m4ri_CC, GurobiDist, MIPDist, CLISATDist, pySATDist, decoderDist, UndetectableErrorStim, GraphLikeErrorStim, ColourCodeDistStim, connectedClusterMW, UndetectableErrorMW, GraphLikeErrorMW, ColourCodeDistMW, magmaMinWeight, magmaMinWord, magmaWEDist, qubitserfBZ, qubitserfMM, BZDistMW, MeetMiddleMW",type=str, default='dist_m4ri_RW')
+    parser.add_argument("--method", help="Distance finding method to use - options are DistRndGAP, QDistRndMW, QDistEvol, dist_m4ri_RW, dist_m4ri_CC, GurobiDist, MIPDist, CLISATDist, pySATDist, decoderDist, UndetectableErrorStim, GraphLikeErrorStim, ColourCodeDistStim, connectedClusterMW, UndetectableErrorMW, GraphLikeErrorMW, ColourCodeDistMW, magmaMinWeight, magmaMinWord, magmaWEDist, qubitserfBZ, qubitserfMM, BZDistMW, MeetMiddleMW",type=str, default='dist_m4ri_RW')
     parser.add_argument("--ignoreTrivialCodes", help="Ignore codes with trivial codespaces",type=int, default=1)
     parser.add_argument("--resume", help="Resume distance finding from previous run - will skip over codes where distance has already been calculated",type=int, default=0)
     parser.add_argument("--nMin", help="Only run codes with n >= nMin",type=int, default=1)  
