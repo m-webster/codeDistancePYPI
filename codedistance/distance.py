@@ -13,20 +13,18 @@ import ortools
 import ortools.linear_solver
 import ortools.linear_solver.pywraplp
 import scipy
+import tesseract_decoder as ts
 
 ## MW Library Files
 from .common import *
 from .NHow import *
 from .code_library import *
 
-## comment out for use on cluster
-# import tesseract_decoder as ts
-
 #########################################################
 ## Main Distance-Finding Functions
 #########################################################
 
-def codeDistance(H,L=None,tB=1,method='QDistRndMW',params={},seed=None,isDEM=False):
+def codeDistance(H,L=None,tB=1,method='QDistRndMW',params={},seed=None):
     '''Main function for code distance finding:
     non-CSS codes  (eg codetables.de): input check matrix S in symplectic form, set tB=2
     CSS codes: input H=HX and L=LX for Z-distance or H=HZ and L=LZ for X-distance, set tB=1
