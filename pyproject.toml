@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "codedistance"
-version = "0.0.1"
+version = "0.0.2"
 description = "Code and Circuit Distance Algorithms."
 license = "GNUv3"
 authors = ["Mark Webster <mark.acacia@gmail.com>","Abraham Jacob <abraham.jacob.17@ucl.ac.uk>","Oscar Higgott <oscarhiggott@google.com>"]
