@@ -5,15 +5,23 @@ Distance algorithms for classical codes, quantum codes and quantum circuits
 Mark Webster, Abe Jacob and Oscar Higgott
 
 # Installation
-To install the python library, use pip install codedistance
+To install the python library, use 
+
+    pip install codedistance
+
+If you wish to make changes to the source code or run the examples from the package, you can also download the codebase from the [github page](https://github.com/m-webster/codeDistancePYPI), create a virtual environment, navigate to the local copy of the codebase and run:
+
+    pip install -e .
 
 Certain distance-finding algorithms require installation of external packages:
 
 1. dist_m4_RW and dist_m4_CC: require compilation of the C library from https://github.com/QEC-pages/dist-m4ri/ and 
 2. magmaMinWeight, magmaMinWord and magmaWEDist: requires a Magma licence https://magma.maths.usyd.edu.au/magma/ and magma binary on system path
-3. DistRndGAP: requires GAP https://www.gap-system.org/ with Guava https://gap-packages.github.io/guava/ and QDistRnd package https://qec-pages.github.io/QDistRnd/ and dist_m4ri on system path
-4. CLISATDist: requies a SAT solver binary on the system path - by default this is cashwmaxsatcoreplus which is available from https://maxsat-evaluations.github.io/2023
-5. qubitserfBZ and qubitserfMM: requires compiliation of the C library from https://github.com/qubitserfed/Qubitserf. By default, this results in an executable called "interface". This binary should be renamed qubitserf and accessible on the system path
+3. DistRndGAP: requires GAP https://www.gap-system.org/ with Guava https://gap-packages.github.io/guava/ and QDistRnd package https://qec-pages.github.io/QDistRnd/ and gap binary on system path
+4. CLISATDist: requies a SAT solver binary on the system path - by default this is cashwmaxsatcoreplus which runs only on Unix systems and is available from https://maxsat-evaluations.github.io/2023
+5. qubitserfBZ and qubitserfMM: requires compiliation of the C library from https://github.com/qubitserfed/Qubitserf. By default, this results in an executable called "interface". This binary should be renamed qubitserf and be accessible on the system path
+
+To compile on a Windows machine we recommend using Cygwin with the packages listed  [here](https://www.codefull.net/2015/12/essential-cygwin-development-packages/).
 
 
 # Main Distance-Finding Functions
@@ -29,29 +37,28 @@ The main inputs to these functions are:
 - params: a dictionary of optional settings for the distance-finding method
 - seed: optional seed for random number generation 
 
-These are described in more detail below.
-
-# Running Datasets from the Paper
-The datasets used in the paper are saved in the examples subfolder. 
-As each dataset may have many codes/circuits, the recommended way to run these is via the batch script runTest.py (also within the examples subfolder).
-The distance-finding results for the data set are saved in a text file within the examples/results folder.
-For example, to find distances of the non-CSS codetables dataset using the QDistEvol function, open a terminal window, navigate/change directory to the examples folder then run the following command via a terminal:
-
-python3 runTest.py --dataset codeTables --datafile QECC_sample.txt --method QDistEvol
-
 # Input Formats for Codes and Circuits
 The form of the input code/circuit depends on the function called. 
 
 For codeDistance, H is a binary check matrix and L is binary matrix representing a logical basis - these are usually best provided as numpy int8 arrays.
 To find distance for non-CSS codes, H should be given in symplectic (two block) form [HX|HZ].
 To indicate that H is in two block form, set tB=2. The tB notation is used throughout the code base to indicate the number of blocks in the matrix.
+L can optionally be excluded or set to None. This would be the case for classical codes or where we have not yet calculated a logical basis. For instance, where H is a two-block matrix representing a non-CSS code, a logical basis is calculated if required by codeDistance.
 
-L can optionally be excluded or set to None. This would be the case for classical codes or where we have not yet calculated a logical basis. For instance, where H is a two-block matrix representing a non-CSS code, a logical basis is calculated if required by the distance-finding method.
-
-For CSScodeDistance the code is represented the binary matrices Hx and Hz representing the X and Z checks respectively. These do not need to be full rank, and can be an over-complete generating set.
-The component input to this function can be set to 'Z' to find Z-distance (the default setting) or 'X' for X-distance.
+For CSScodeDistance binary matrices Hx and Hz are used to represent the X and Z checks respectively. These do not need to be full rank, and can be an over-complete set.
+The component parameter can be set to 'Z' to find Z-distance (the default setting) or 'X' for X-distance.
 
 For circuitDistance, the circuit qc should be provided in Stim format.
+
+# Output Format
+The three main functions return a python dictionary with the following fields:
+- n: length of the code/circuit
+- k: number of logicals/observables
+- d: minimum distance estimate
+- L: example of a logical or codeword with weight d in binary form
+- T: the number of trials conducted (eg for QDistRnd or syndrome decoder methods)
+- R: the number of trials which gave the distance estimate d
+- progress: status information output by the method during processing
 
 # Distance-Finding Methods
 The distance-finding methods available in the package are as follows:
@@ -88,9 +95,19 @@ The distance-finding methods available in the package are as follows:
 - BZDistMW: Python implementation of Brouwer-Zimmermann natively supporting CSS codes and multiple block representations of non-CSS quantum codes.
 - qubitserfBZ: wrapper to C library implementation of https://github.com/qubitserfed/Qubitserf
 
+
 ## Matching Bipartition/Meet in the Middle
 - qubitserfMM: wrapper to C library implementation of https://github.com/qubitserfed/Qubitserf
 - MeetMiddleMW: python implementation of algorithm set out in https://github.com/qiskit-community/qiskit-qec/blob/main/docs/tutorials/QEC_Framework_IEEE_2022.ipynb
+
+
+# Running Datasets from the Paper
+The datasets used in the paper are saved in the examples subfolder https://github.com/m-webster/codeDistancePYPI/tree/main/examples. 
+As each dataset may have many codes/circuits, the recommended way to run these is via the batch script runTest.py (also within the examples subfolder).
+The distance-finding results for the data set are saved in a text file within the examples/results folder.
+For example, to find distances of the non-CSS codetables dataset using the QDistEvol function, open a terminal window, navigate/change directory to the examples folder then run the following command via a terminal:
+
+    python3 runTest.py --dataset codeTables --datafile QECC_sample.txt --method QDistEvol
 
 # Parameters for Distance-Finding Methods
 Here we lay out the main parameter settings used for various distance-finding methods:
