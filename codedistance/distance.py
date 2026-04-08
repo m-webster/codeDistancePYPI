@@ -30,10 +30,14 @@ def codeDistance(H,L=None,tB=1,method='QDistRndMW',params={},seed=None):
     CSS codes: input H=HX and L=LX for Z-distance or H=HZ and L=LZ for X-distance, set tB=1
     Classical binary linear codes: set S to be the generator matrix, tB=1 '''
     H = Z2Mat(H)
+    # rWeights = rowWeight(H,tB)
+    # cWeights = np.sum(H,axis=0)
+    # print(f'H Row/Col weights: {set(map(int,rWeights))} {set(map(int,rWeights))}')
     if L is not None:
         L = Z2Mat(L)
     r,n = H.shape
     res = {'n':n//tB,'k':0,'d': 0, 'L': Z2MatZeros(n), 'progress': '', 'R': 1,'T': 1}
+    params['method'] = method
     wDict = None
     if method in {'magmaMinWeight', 'magmaMinWord','magmaWEDist'}:
         res['d'],res['L'],res['progress'] = magmaDist(H,L,tB,params)
@@ -1908,6 +1912,21 @@ def parseSATResult(mytext):
 ## Decoder Methods
 ###########################################################
 
+def randomLO(H,L,params,rnd):
+    ## make a random non-trivial lo
+    k,n = L.shape
+    r = len(H)
+    x = NonZeroVecRand(k)
+    lo = Z2MatZeros(n)
+    for j in bin2Set(x):
+        lo ^= L[j]
+    ## add randomly generated set of stabilisers to lo
+    if params['addStabs']:
+        x = rnd.integers(2,size=r)
+        for j in bin2Set(x):
+            lo ^= H[j]
+    return lo
+
 def decoderDist(H,L,params={},seed=None):
     '''Distance via syndrome decoders
     set maxErr to a value 0 < maxErr <= 1 to terminate when probability of error less than pErr'''
@@ -1919,10 +1938,14 @@ def decoderDist(H,L,params={},seed=None):
         'maxErr':-1,
         'priors':None,
         'addStabs':0,
-        'permuteDEM': 1
+        'permuteDEM': 1,
+        'randomLO': 1
     }
     params = setDefaultParams(params,paramDefaults)
     k = len(L)
+    ## if params['randomLO'] == 0, then just try each of the k basis elements
+    if params['randomLO'] == 0:
+        params['iterCount'] = k
     s = Z2Mat([0] * r + [1])
     Hlo = ZMatVstack([H,Z2MatZeros((1,n))])
     wDict = ZMatZeros(n+1)
@@ -1931,16 +1954,7 @@ def decoderDist(H,L,params={},seed=None):
     best, minWords, minWordCount, nExp, pErr = mwUpdate(w,minRows)
     ix = np.arange(n)
     for TrialId in range(params['iterCount']):
-        ## make a random non-trivial lo
-        x = NonZeroVecRand(k)
-        lo = Z2MatZeros(n)
-        for j in bin2Set(x):
-            lo ^= L[j]
-        ## add randomly generated set of stabilisers to lo
-        if params['addStabs']:
-            x = rnd.integers(2,size=r)
-            for j in bin2Set(x):
-                lo ^= H[j]
+        lo = randomLO(H,L,params,rnd) if params['randomLO'] else L[TrialId]
         Hlo[-1] = lo
         ## find a correction
         decoderType = params['decoder']
@@ -1953,6 +1967,8 @@ def decoderDist(H,L,params={},seed=None):
             lo = bplsdDecode(Hlo[:,ix],s,params=params)
         elif decoderType in {'tesseract','tesseractLongbeam'}:
             lo = tesseractDecode(Hlo[:,ix],s,params=params)
+        elif decoderType == 'simplex':
+            lo = simplexDecode(Hlo[:,ix],s,params=params)
         ## reverse permutation for lo
         if params['permuteDEM']:
             lo = lo[ixRev(ix)]
@@ -2007,12 +2023,48 @@ def tesseractDecode(DEMH,s,params={},seed=0):
         det_orders=det_orders,
     )
     decoder = ts.tesseract.TesseractDecoder(config)
+    decoder = ts.simplex.SimplexDecoder(config)
     decoder.decode_to_errors(syndrome=np.array(s,dtype=bool))
     ## Tesseract jumbles the order of the errors - need to restore order!!
     nErr = len(DEMH.T)
     DEMDict = {tuple(bin2Set(DEMH[:,i])):i for i in range(nErr)}
-    errMap = Z2MatZeros(nErr)
+    errMap = ZMatZeros(nErr)
     ## decoder.errors are the errors and symptom.detector tells us which detectors they fire
+    # print('error weight',len(decoder.predicted_errors_buffer),'low_confidence_flag',decoder.low_confidence_flag)
+
+    for i,myObj in enumerate(decoder.errors):
+        errMap[i] = DEMDict[tuple(myObj.symptom.detectors)]
+    return set2Bin(nErr,errMap[decoder.predicted_errors_buffer],dtype=np.int8)
+
+
+def simplexDecode(DEMH,s,params={},seed=0):
+    '''apply simplex Decoder from tesseract distribution with DEM matrix DEMH and syndrome s'''
+    StimDEM = Stabs2StimDEM(DEMH)
+    defaultParams = {
+        'parallelize':False,
+        'window_length':0,
+        'window_slide_length':0,
+        'merge_errors':True
+    }
+    setDefaultParams(params, defaultParams)
+    config = ts.simplex.SimplexConfig(
+        dem=StimDEM,
+        parallelize=params['parallelize'],
+        window_length=params['window_length'],
+        window_slide_length=params['window_slide_length'],
+        merge_errors=params['merge_errors']
+    )
+    decoder = ts.simplex.SimplexDecoder(config)
+    decoder.init_ilp()
+    # print('init_ilp')
+    decoder.decode_to_errors(syndrome=np.array(s,dtype=bool))
+    # print('decode_to_errors')
+    ## Tesseract jumbles the order of the errors - need to restore order!!
+    nErr = len(DEMH.T)
+    DEMDict = {tuple(bin2Set(DEMH[:,i])):i for i in range(nErr)}
+    errMap = ZMatZeros(nErr)
+    ## decoder.errors are the errors and symptom.detector tells us which detectors they fire
+    # print('error weight',len(decoder.predicted_errors_buffer))
     for i,myObj in enumerate(decoder.errors):
         errMap[i] = DEMDict[tuple(myObj.symptom.detectors)]
     return set2Bin(nErr,errMap[decoder.predicted_errors_buffer],dtype=np.int8)
