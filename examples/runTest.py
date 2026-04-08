@@ -69,6 +69,8 @@ def defaultParser():
     parser.add_argument("--decoder", help="Type of decoder - for decoderDist only. Options are bposd, bplsd, sebplsd, tesseract, tesseractLongbeam",type=str, default='bposd')
     parser.add_argument("--addStabs",help="Add stabilisers to randomly generated error",type=int,default=0) 
     parser.add_argument("--permuteDEM",help="Apply random permutation to columns of DEM",type=int,default=1) 
+    parser.add_argument("--randomLO",help="Generate random LO",type=int,default=1) 
+    
                         
     ## method=='decoderDist' and decoder in {'bposd','bplsd','sebplsd'} only
     ## product_sum good for code capacity, bad for circuit level noise - don't have sparse matrices in this case
