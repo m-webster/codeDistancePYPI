@@ -85,7 +85,7 @@ def codeDistance(H,L=None,tB=1,method='QDistRndMW',params={},seed=None):
     if wDict is not None and res['d'] < len(wDict):
         res['R'] = wDict[res['d']]
         res['T'] = np.sum(wDict)
-    if params['LOCheck']:
+    if 'LOCheck' in params:
         LOcheck(res['L'],H,L,tB)
     return res
 
@@ -1834,7 +1834,7 @@ def pySATdist(H,L,params):
     myFile = f"{myDir}/{randomFilename()}.wcnf"
     with open(myFile,'w') as f:
         f.write(SATstr)
-    funcParams = [f'{params['pySATbinary']}.py', '-vv','-s',params['pySATsolver']]
+    funcParams = [f"{params['pySATbinary']}.py", '-vv','-s',params['pySATsolver']]
     if params['pySATbinary'] == 'lsu':
         ## LSU doesn't print model by default
         funcParams.append("-m")

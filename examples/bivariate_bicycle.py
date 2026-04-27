@@ -211,7 +211,7 @@ def BBCodeList():
     startTimer()
     for codeDict in generated_bb_codes:
         Hx, Hz = BBIBM(codeDict["l"], codeDict["m"], codeDict["Apoly"], codeDict["Bpoly"])
-        name = f'BB{codeDict['n']}'
+        name = f"BB{codeDict['n']}"
         myCode = CSS2Dict(Hx, Hz, d=codeDict["d"])
         if myCode['k'] > 0:
             codeList.append(myCode)

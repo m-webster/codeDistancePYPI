@@ -174,7 +174,7 @@ def uvProcess(l, m, uVec, vVec,c2,certList,outfile):
             dX = len(lo)
         ## write to file
         with open(outfile,'a') as f:
-            f.write(f'{myCode['n']}\t{myCode['k']}\t{dZ}\t{dX}\t{l}\t{m}\t{"\t".join(map(str,uVec))}\t{"\t".join(map(str,vVec))}\t{XCert}\n')
+            f.write(f"{myCode['n']}\t{myCode['k']}\t{dZ}\t{dX}\t{l}\t{m}\t{'\t'.join(map(str,uVec))}\t{'\t'.join(map(str,vVec))}\t{XCert}\n")
 
 
 def BBSample(l,m,c,vCycles,outfile,sampleSize):
