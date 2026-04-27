@@ -73,7 +73,7 @@ def CSSSXLX2S(SX,LX=None):
     # codeDict = CSS2Dict(SX,SZ)
     # Lx,Lz = getLogicalPaulis(S)
     # print(f'getLogicalPaulis: {len(Lx)}, {len(Lz)}')
-    # print(f'CSS2Dict: [{codeDict['n']},{codeDict['k']},{codeDict['d']}]')
+    # print(f"CSS2Dict: [{codeDict['n']},{codeDict['k']},{codeDict['d']}]")
     return S
 
 def getLogicalPaulis(S):

@@ -111,11 +111,11 @@ startTimer()
 for method in methods:
     print(method)
     res = circuitDistance(qc,method=method,params=params,seed=0)
-    print(f'Calculated distance: {res['d']}')
+    print(f"Calculated distance: {res['d']}")
     print(f'Time Taken: {elapsedTime()}')
     if (res['T'] > 1):
-        print(f'Total Trials: {res['T']}')
-        print(f'Trials at d={res['d']}: {res['R']}')
+        print(f"Total Trials: {res['T']}")
+        print(f"Trials at d={res['d']}: {res['R']}")
     lo = res['L']
     if (np.sum(lo)) > 0:
         # r1,V = HowRes(Hz,lo,2)

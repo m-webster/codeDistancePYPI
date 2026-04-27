@@ -127,18 +127,18 @@ startTimer()
 for method in methods:
     res = codeDistance(S,L=None,tB=tB,method=method,params=params,seed=0)
     print(method)
-    print(f'Calculated distance: {res['d']}')
-    print(f'Time Taken: {elapsedTime()}')
+    print(f"Calculated distance: {res['d']}")
+    print(f"Time Taken: {elapsedTime()}")
     if (res['T'] > 1):
-        print(f'Total Trials: {res['T']}')
-        print(f'Trials at d={res['d']}: {res['R']}')
+        print(f"Total Trials: {res['T']}")
+        print(f"Trials at d={res['d']}: {res['R']}")
     lo = res['L']
     if (np.sum(lo)) > 0:
         r1,V = HowRes(S,lo,2)
-        print(f'lo: {bin2Set(lo)}')
+        print(f"lo: {bin2Set(lo)}")
         lo = ZMat2D(lo)
         if tB == 2:
             lo = XZhad(lo)   
         r2 = matMul(lo,S.T,2)
-        print(f'Logical Operator Check: commutes with stabilisers {np.sum(r2)==0}; non-trivial {np.sum(r1)!=0}')
+        print(f"Logical Operator Check: commutes with stabilisers {np.sum(r2)==0}; non-trivial {np.sum(r1)!=0}")
     print("###########################################\n")
