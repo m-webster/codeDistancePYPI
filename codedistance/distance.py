@@ -13,7 +13,7 @@ import ortools
 import ortools.linear_solver
 import ortools.linear_solver.pywraplp
 import scipy
-import tesseract_decoder as ts
+# import tesseract_decoder as ts
 
 ## MW Library Files
 from .common import *
@@ -209,6 +209,36 @@ def pauli2str(S,tB=2):
         S = S[:,:n] * 2 + S[:,n:]
     PauliStrings = "IXZY"
     return "\n".join(["".join([PauliStrings[a] for a in myrow]) for myrow in S])
+
+
+def codeDecomp(S,tB=2):
+    '''Separate stabiliser code into indecomposable parts using method of Slepian, 1960'''
+    H = getH(S,N=2,tB=2)
+    H1 = mod1(ZMatBlockSum(H,tB=tB))
+    m,n = H1.shape
+    partitions = []
+    rSet = set(range(m))
+    cSet = set(range(n))
+    while len(rSet) > 0:
+        r = min(rSet)
+        cVisited = set()
+        rVisited = {r}
+        rTodo = [r]
+        while(len(rTodo) > 0):
+            r = rTodo.pop()
+            for c in bin2Set(H1[r]):
+                if c not in cVisited:
+                    cVisited.add(c)
+                    for r in bin2Set(H1[:,c]):
+                        if r not in rVisited:
+                            rTodo.append(r)
+                            rVisited.add(r)
+        if tB == 2:
+            cVisited.update({n+c for c in cVisited})
+        partitions.append(list(cVisited))
+        rSet.difference_update(rVisited)
+        cSet.difference_update(cVisited)
+    return partitions
 
 def defaultLogicals(S,tB):
     '''Return defaul logical operators for distance-finding
@@ -678,6 +708,12 @@ def grayBit(x,r):
 def grayCode(x):
     '''calculte Gray Code corresponding to integer x'''
     return  x ^ (x >> 1)
+
+def bin2int(x):
+    """Interpret a little-endian binary vector as an integer."""
+    ## need to reverse to make consistent with int2bin
+    xStr = "".join(map(str, reversed(x)))
+    return int(xStr, base=2)
 
 @nb.jit (nb.int8[:](nb.int64,nb.int64))
 def int2bin(x,n):
@@ -1174,6 +1210,7 @@ def dist_m4ri_RW(S,L,tB=2,params={},seed=0):
 
 def dist_m4ri_CC(S,L,tB=2,params={},seed=0):
     '''Connected Cluster algorithm'''
+    addI = False
     if tB == 2:
         ## 2-block non-CSS code
         if L is None:
@@ -1637,7 +1674,8 @@ def gurobiDist(S,L=None,tB=1,params={}):
         'verbose': False,
         'maxTime': 3600 * 8,
         'nThreads': 1,
-        'GF4blockRep': 2
+        'GF4blockRep': 2,
+        'LOCheck': 0 
     }
     params = setDefaultParams(params,paramDefaults)
     if L is None:
@@ -1730,7 +1768,8 @@ def MIPDist(DEMH,DEML=None,solverType='SCIP',params={}):
     paramDefaults = {
         'verbose': False,
         'maxTime': 3600 * 8,
-        'nThreads': 1
+        'nThreads': 1,
+        'LOCheck': 0
     }
     params = setDefaultParams(params,paramDefaults)
     r,n = DEMH.shape
@@ -2125,7 +2164,8 @@ def dist_qubitserf(S,L=None,tB=1,params={}):
     defaultParams={
         'method':'qubitserfMM',
         'maxTime' : 8 * 60 * 60,
-        'nThreads' : 1
+        'nThreads' : 1,
+        'LOCheck': 0
     }
     method = 1 if params['method'] == 'qubitserfBZ' else 2
     params = setDefaultParams(params,defaultParams)

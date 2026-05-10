@@ -450,7 +450,12 @@ def HowPivots(A,nA=0,tB=1,nC=-1,r0=0):
 # @nb.jit
 # @nb.jit(nb.types.Tuple((nb.int8[:,:],nb.int64[:]))(nb.int8[:,:],nb.int64,nb.int64,nb.int64,nb.int64))
 
-
+def indepVecs(A):
+    """Return a linearly independent subset of rows from A, preserving priority order - uses only 2 RREF calls."""
+    H, U = getHU(A, 2)
+    K = U[np.sum(H, axis=-1) == 0, :]
+    K, LI = getH(K, 2, retPivots=True)
+    return invRange(len(A), LI)
 
 def indepL(L,pList,nA,tB,retWeights=False):
     w = np.sum(L[:,-nA:],axis=-1)
