@@ -36,6 +36,7 @@ params = {
     'iterCount': 100,     ## number of iterations - eg QDistRnd, decoderDist
     'maxTime': 3600*8,      ## max runtime for CLI methods (eg SAT, m4ri, )
     'nThreads': 1,          ## cater for multi-threaded methods
+    'LOCheck': 0            ## check logical operators
 }
 
 ## Magma distance finding: requires Magma licence and magma executable in PATH

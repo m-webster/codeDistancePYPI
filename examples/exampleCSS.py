@@ -21,11 +21,12 @@ params = {
     'iterCount': 10000,     ## number of iterations - eg QDistRnd, decoderDist
     'maxTime': 3600*8,      ## max runtime for CLI methods (eg SAT, m4ri, )
     'nThreads': 1,          ## cater for multi-threaded methods
+    'LOCheck': 0            ## check logical operators
 }
 
 ## Magma distance finding: requires Magma licence and magma executable in PATH
-# method = 'magmaMinWeight'
-method = 'magmaMinWord'
+method = 'magmaMinWeight'
+# method = 'magmaMinWord'
 # method = 'magmaWEDist'
 
 ## Serban Cercelescu C Library https://github.com/qubitserfed/Qubitserf
@@ -104,9 +105,9 @@ allMethods = ['magmaMinWeight',
               'GraphLikeErrorMW',
               'ColourCodeDistMW',
               'decoderDist',
-              'GurobiDist',
               'MIPDist',
-              'pySATDist']
+              'pySATDist',
+              'GurobiDist']
 
 ## Single Method
 methods = [method]
@@ -122,11 +123,4 @@ for method in methods:
     if (res['T'] > 1):
         print(f'Total Trials: {res['T']}')
         print(f'Trials at d={res['d']}: {res['R']}')
-    lo = res['L']
-    if (np.sum(lo)) > 0:
-        r1,V = HowRes(Hz,lo,2)
-        print(f'lo: {bin2Set(lo)}')
-        lo = ZMat2D(lo)
-        r2 = matMul(lo,Hx.T,2)
-        print(f'Logical Operator Check: commutes with stabilsers {np.sum(r2)==0}; non-trivial {np.sum(r1)!=0}')
     print("###########################################\n")
