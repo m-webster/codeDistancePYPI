@@ -891,9 +891,8 @@ def magmaWeightEnumerator(S,tB=1,verbose=False):
     for w in WE:
         w = w.strip()
         w = w.split("*")
-        if len(w) == 1:
-            t = 1
-        else:
+        t = 1
+        if w[0].isnumeric():
             t = int(w[0])
             w = w[1:]
         b = 0
@@ -1873,7 +1872,7 @@ def pySATdist(H,L,params):
     myFile = f"{myDir}/{randomFilename()}.wcnf"
     with open(myFile,'w') as f:
         f.write(SATstr)
-    funcParams = [f'{params['pySATbinary']}.py', '-vv','-s',params['pySATsolver']]
+    funcParams = [f"{params['pySATbinary']}.py", '-vv','-s',params['pySATsolver']]
     if params['pySATbinary'] == 'lsu':
         ## LSU doesn't print model by default
         funcParams.append("-m")
